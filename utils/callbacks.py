@@ -12,6 +12,9 @@ def save_weights(checkpoint_path):
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_path,
         save_weights_only=True,
+        monitor='val_total_loss',
+        save_best_only=True,
+        mode='min',
         verbose=1
     )
 

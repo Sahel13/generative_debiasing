@@ -35,10 +35,10 @@ def construct_encoder(input_dim, latent_dim, conv_filters, kernel_sizes):
     x = layers.Flatten()(x)
 
     z_mean = layers.Dense(latent_dim, name='z_mean')(x)
-    z_log_sigma = layers.Dense(latent_dim, name='z_log_sigma')(x)
+    z_log_var = layers.Dense(latent_dim, name='z_log_var')(x)
 
     encoder = tf.keras.Model(
-        encoder_input, [z_mean, z_log_sigma], name='Encoder'
+        encoder_input, [z_mean, z_log_var], name='Encoder'
     )
     return encoder, shape_before_flattening
 
@@ -108,11 +108,11 @@ class VAE(tf.keras.Model):
         ]
 
     @staticmethod
-    def sample_z(z_mean, z_log_sigma):
+    def sample_z(z_mean, z_log_var):
         """
         Sample from a Gaussian distribution.
-        Arguments: z_mean, z_log_sigma (tensor): mean and log
-        of standard deviation of latent distribution (Q(z|X)).
+        Arguments: z_mean, z_log_var (tensor): mean and log
+        of variance of latent distribution (Q(z|X)).
         Returns: z (tensor): sampled latent vector.
         """
         batch = tf.shape(z_mean)[0]
@@ -120,15 +120,15 @@ class VAE(tf.keras.Model):
         # Reparameterize using epsilon.
         epsilon = tf.random.normal(shape=(batch, latent_dim))
 
-        z = z_mean + tf.math.exp(0.5 * z_log_sigma) * epsilon
+        z = z_mean + tf.math.exp(0.5 * z_log_var) * epsilon
         return z
 
     @staticmethod
-    def loss_function(x, x_recon, z_mean, z_log_sigma, kl_weight):
+    def loss_function(x, x_recon, z_mean, z_log_var, kl_weight):
         """
         The loss function for VAE.
         Arguments: An input x, reconstructed output x_recon,
-        encoded mean z_mean, encoded log of standard deviation z_log_sigma,
+        encoded mean z_mean, encoded log of variance z_log_var,
         and weight parameter for the latent loss kl_weight.
         """
         # The reconstruction loss (L2).
@@ -136,7 +136,7 @@ class VAE(tf.keras.Model):
 
         # The KL-divergence loss.
         kl_div_loss = 0.5 * tf.reduce_sum(
-            tf.exp(z_log_sigma) + tf.square(z_mean) - 1.0 - z_log_sigma, axis=1
+            tf.exp(z_log_var) + tf.square(z_mean) - 1.0 - z_log_var, axis=1
         )
 
         vae_loss = recon_loss + kl_weight * kl_div_loss
@@ -147,13 +147,13 @@ class VAE(tf.keras.Model):
         Forward pass of the model.
         """
         # Given an input x, find mean and std of the latent variables.
-        z_mean, z_log_sigma = self.encoder(x)
+        z_mean, z_log_var = self.encoder(x)
         # Sample from the latent variable distributions.
-        z = VAE.sample_z(z_mean, z_log_sigma)
+        z = VAE.sample_z(z_mean, z_log_var)
         # Reconstruct the output from the sampled value z.
         x_recon = self.decoder(z)
 
-        return z_mean, z_log_sigma, x_recon
+        return z_mean, z_log_var, x_recon
 
     def train_step(self, data):
         """
@@ -165,9 +165,9 @@ class VAE(tf.keras.Model):
             x = data
 
         with tf.GradientTape() as tape:
-            z_mean, z_log_sigma, x_recon = self(x, training=True)
+            z_mean, z_log_var, x_recon = self(x, training=True)
             total_loss, kl_div_loss, recon_loss = VAE.loss_function(
-                x, x_recon, z_mean, z_log_sigma, self.kl_weight)
+                x, x_recon, z_mean, z_log_var, self.kl_weight)
 
         # Compute and update gradients
         grads = tape.gradient(total_loss, self.trainable_weights)
@@ -178,8 +178,27 @@ class VAE(tf.keras.Model):
         self.kl_loss_tracker.update_state(kl_div_loss)
         self.recon_loss_tracker.update_state(recon_loss)
 
-        return {
-            'total_loss': self.total_loss_tracker.result(),
-            'kl_div_loss': self.kl_loss_tracker.result(),
-            'recon_loss': self.recon_loss_tracker.result()
-        }
+        return {m.name: m.result() for m in self.metrics}
+
+    def test_step(self, data):
+        """
+        Custom test step.
+        """
+        # Unpack the data
+        if isinstance(data, tuple):
+            x = data[0]
+        else:
+            x = data
+
+        # Compute losses
+        z_mean, z_log_var, x_recon = self(x, training=False)
+        total_loss, kl_div_loss, recon_loss = VAE.loss_function(
+            x, x_recon, z_mean, z_log_var, self.kl_weight)
+
+        # Update metrics
+        self.total_loss_tracker.update_state(total_loss)
+        self.kl_loss_tracker.update_state(kl_div_loss)
+        self.recon_loss_tracker.update_state(recon_loss)
+
+        # Return a dict mapping metric names to current value.
+        return {m.name: m.result() for m in self.metrics}
