@@ -1,16 +1,15 @@
 import os
 
-# Use only a specific GPU.
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-
 import argparse
-import numpy as np
 
 import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator
 
 from models.vae import VAE
 from utils.callbacks import save_weights
+
+# Use only a specific GPU.
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-k', '--kl_weight',

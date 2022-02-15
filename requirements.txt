@@ -1,8 +1,6 @@
 pandas
-imageio
 matplotlib
 pillow
-pydot
 scipy
 notebook
 flake8

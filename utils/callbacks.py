@@ -5,6 +5,7 @@ Custom callbacks.
 import os
 import tensorflow as tf
 
+
 def save_weights(checkpoint_path):
     if not os.path.exists(os.path.dirname(checkpoint_path)):
         os.makedirs(os.path.dirname(checkpoint_path))
