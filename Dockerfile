@@ -5,9 +5,9 @@ FROM tensorflow/tensorflow:latest-gpu-jupyter
 WORKDIR ~/code
 
 # Change user to the Docker host user.
-ARG USER_NAME=my_username
-ARG USER_ID=1000
-ARG GROUP_ID=1000
+ARG USER_NAME=sahel
+ARG USER_ID=1002
+ARG GROUP_ID=1002
 
 RUN groupadd -g $GROUP_ID $USER_NAME \
   && useradd -m -l -r -u $USER_ID -g $USER_NAME $USER_NAME

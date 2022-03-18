@@ -62,7 +62,7 @@ vae.compile(optimizer)
 checkpoint_path = os.path.join('results', 'vae', output_dir, 'cp.ckpt')
 
 # Callback to save weights after each epoch.
-cp_callback = save_weights(checkpoint_path)
+cp_callback = save_weights(checkpoint_path, 'val_total_loss')
 
 # Callback for early stopping.
 early_stop = tf.keras.callbacks.EarlyStopping(
