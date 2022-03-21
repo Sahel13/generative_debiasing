@@ -1,12 +1,10 @@
 import os
-
 import argparse
-
 import tensorflow as tf
-from keras.preprocessing.image import ImageDataGenerator
 
 from models.vae import VAE
 from utils.callbacks import save_weights
+from utils.dataloader import load_vae_data
 
 # Use only a specific GPU.
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
@@ -31,27 +29,7 @@ input_dim = (128, 128, 3)
 
 # Load data.
 data_folder = os.path.join('datasets', 'celeba')
-
-data_gen = ImageDataGenerator(
-    rescale=1./255,
-    validation_split=0.2
-)
-train_data = data_gen.flow_from_directory(
-    data_folder,
-    target_size=input_dim[:2],
-    batch_size=batch_size,
-    shuffle=True,
-    class_mode='input',
-    subset='training'
-)
-val_data = data_gen.flow_from_directory(
-    data_folder,
-    target_size=input_dim[:2],
-    batch_size=batch_size,
-    shuffle=True,
-    class_mode='input',
-    subset='validation'
-)
+train_data, val_data = load_vae_data(data_folder, input_dim, batch_size)
 
 # Load and compile the model.
 vae = VAE(kl_weight=kl_weight)

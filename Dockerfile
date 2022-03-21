@@ -2,7 +2,7 @@
 FROM tensorflow/tensorflow:latest-gpu-jupyter
 
 # Make a directory for the code.
-WORKDIR ~/code
+WORKDIR /code
 
 # Change user to the Docker host user.
 ARG USER_NAME=sahel

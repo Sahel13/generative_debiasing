@@ -3,13 +3,11 @@ References for implementation:
     https://github.com/aamini/introtodeeplearning/blob/master/lab2/Part2_Debiasing.ipynb
 """
 
-import numpy as np
 import tensorflow as tf
 import functools
 from tensorflow.keras import layers
 
-
-n_filters = 12 # base number of convolutional filters
+n_filters = 12  # base number of convolutional filters
 
 
 def construct_classifier(n_outputs=1):

@@ -23,7 +23,8 @@ Change the USER\_NAME, USER\_ID and GROUP\_ID build time variables inside the Do
 
 ## Experiments
 
-Start with training the autoencoder.
+### Step 1
+Train the variational autoencoder.
 ```
 $ python train_vae.py -o output_dir
 ```

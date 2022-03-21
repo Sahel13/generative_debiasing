@@ -1,7 +1,8 @@
 datasets/
 results/
 __pycache__/
-tests/
-.vscode/
+.pytest_cache/
 .ipynb_checkpoints/
 generative_debiasing.egg-info/
+env/
+checks/

@@ -4,3 +4,6 @@ pillow
 scipy
 notebook
 flake8
+tqdm
+pytest
+mitdeeplearning

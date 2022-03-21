@@ -1,9 +1,8 @@
 import os
 import pickle
 import random
-from pathlib import Path
-
 import shutil
+from pathlib import Path
 
 # The number of images of a particular type to select.
 num_imgs_of_type = 400
@@ -34,9 +33,6 @@ with open('imagenet_images.pkl', 'wb') as file:
 # Load the image names from the pickled file. 
 with open('imagenet_images.pkl', 'rb') as file:
     image_dict = pickle.load(file)
-
-# At this point, I have the names of all the images that I need. Now what do I
-# do? I need to move them all to one combined folder.
 
 # Specify (and create if neeed) the destination directory.
 dest_dir = 'imagenet'
