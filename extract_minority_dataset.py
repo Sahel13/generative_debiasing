@@ -10,10 +10,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-w', '--wdir',
                     required=True,
                     help="The checkpoint directory for weights.")
-parser.add_argument('-d', '--dest',
-                    required=True,
-                    help="The destination directory - where to copy the \
-                    minority images to.")
 args = parser.parse_args()
 
 # Hyper-parameters
@@ -26,8 +22,6 @@ data_folder = os.path.join('datasets', 'celeba')
 image_folder = os.path.join(data_folder, 'img_align_celeba')
 
 checkpoint_path = os.path.join('results', 'vae', args.wdir, 'cp.ckpt')
-dest_dir = args.dest
-os.makedirs(dest_dir)
 
 # Load the model.
 vae = VAE()
@@ -56,7 +50,10 @@ percentage = minority_list.sum()/len(minority_list) * 100
 output_folder = os.path.join(
     os.path.dirname(checkpoint_path), f'minority_{percentage:02.0f}')
 
+dest_dir = os.path.join(output_folder, f'minority_{percentage:02.0f}_images')
+
 os.mkdir(output_folder)
+os.mkdir(dest_dir)
 output_file = os.path.join(output_folder, 'minority_dataset.csv')
 
 # Create and save the minority dataset to a new file.

@@ -17,16 +17,25 @@ $ pip install -e .
 ```
 
 ### Using Docker
-Ensure [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) is installed for GPU support.
+[NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker) is needed for GPU support.
 
-Change the USER\_NAME, USER\_ID and GROUP\_ID build time variables inside the Dockerfile corresponding to your user (use `id -u` and `id -g` to find the USER\_ID and GROUP\_ID respectively).
+Change the USER\_NAME, USER\_ID and GROUP\_ID build time variables inside the Dockerfile corresponding to your user (use `id -u` and `id -g` to find your USER\_ID and GROUP\_ID respectively).
 
-## Experiments
+## The debiasing process
 
 ### Step 1
-Train the variational autoencoder.
+Train the variational autoencoder. The network architecture is given in `models/vae.py`.
 ```
 $ python train_vae.py -o output_dir
 ```
+Run the notebook `notebooks/01_visualize_vae_output.ipynb` to visualize training results.
 
-Now run the notebook `notebooks/02_create_minority_dataset.ipynb` to create a file containing the names and attributes of images that constitute the minority dataset.
+### Step 2
+Use the VAE to extract a minority dataset.
+```
+$ python extract_minority_dataset.py -w checkpoint_dir -d destination_dir
+```
+The size of this minority dataset (as a percentage of the original) can be adjusted within the code. Run the notebook `notebooks/02_inspect_minority_dataset.ipynb` to understand the different properties of the minority dataset thus created.
+
+### Step 3
+Train a generative adversarial network on the minority dataset that we just created. I am using [StyleGAN2-ADA-PyTorch](https://github.com/NVlabs/stylegan2-ada-pytorch) made available by [Nvidia Research Projects](https://github.com/NVlabs).
